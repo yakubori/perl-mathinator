@@ -1,68 +1,57 @@
 package Mathinator::Mooed;
 
+use Carp qw(croak);
+use Memoize;
 use Moo;
 
-my $properties = {
-  even      => sub { $_[0] % 2 == 0 },
-  negative  => sub { $_[0] < 0 },
-  squared   => sub { $_[0] * $_[0]; },
-  
-  prime => sub {
-    my $n = shift;
-    
-    return '' if $n < 2;
+memoize(qw(_build_even _build_negative _build_prime factorial squared));
 
-    for ( 2 .. ($n - 1) ) {
-      
-      return '' if $n % $_ == 0;
-    
-    }
+sub BUILDARGS {
 
-    return 1;
-  },
-  
-  factorial => sub {
-    my $n = shift;
-    my $f = 1;
+  my ($class, %args) = @_;
 
-    do { $f *= $_ } for ( 2 .. $n );
+  # We don't want anyone messing with certain attributes on instantiation.
+  do { croak "Cannot set $_" if exists $args{$_} } for qw(even negative prime);
 
-    $f;
-  },
-};
-
-sub _props {
-
-  my ($self, $key) = @_;
-
-  my $p = $properties->{$key};
-
-  # If we have a promise (callback), this is the first time the method has been called.
-  # Run it and replace the callback with the return value.
-  if ( ref $p eq 'CODE' ) {
-
-    $p = $p->($self->num);
-    $properties->{$key} = $p;
-
-  }
-
-  return $p;
+  return \%args;
 
 }
-
-sub is_even { shift->_props('even') }
-
-sub is_negative { shift->_props('negative') }
-
-sub is_prime { shift->_props('prime') }
-
-sub factorial { shift->_props('factorial') }
-
-sub squared { shift->_props('squared') }
 
 has 'num' => (
   is => 'ro',
   isa => sub { int $_[0] }
 );
+
+has 'even' => ( is => 'lazy' );
+has 'negative' => ( is => 'lazy' );
+has 'prime' => ( is => 'lazy' );
+
+sub _build_even { shift->num % 2 == 0 }
+
+sub _build_negative { shift->num < 0 }
+
+sub squared {
+  my $n = shift->num;
+  $n * $n;
+}
+
+sub _build_prime {
+  my $n = shift->num;
+        
+  return '' if $n < 2;
+
+  for ( 2 .. ($n - 1) ) { return '' if $n % $_ == 0 }
+
+  1;
+}
+
+sub factorial {
+  my $n = shift->num;
+  my $f = 1;
+
+  do { $f *= $_ } for ( 2 .. $n );
+
+  $f;
+}
 
 1;
