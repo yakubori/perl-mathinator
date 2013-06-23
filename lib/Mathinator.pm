@@ -3,85 +3,57 @@ package Mathinator;
 use strict;
 use warnings;
 
+use Memoize;
+
+memoize( qw(is_even is_negative is_prime squared factorial) );
+
 sub new {
   
   my $class = shift;
   my $num   = int shift;
 
-  # Closures which are to be lazily evaluated and ultimately replaced by their respective
-  # return values.
-  #
-  # This is an example of how we can save compute resources via promises and memoization.
-  my $properties = {
-    
-    even      => sub { $num % 2 == 0 },
-    negative  => sub { $num < 0 },
-    squared   => sub { $num * $num },
-    
-    prime => sub {
-
-      return '' if $num < 2;
-
-      for ( 2 .. ($num - 1) ) {
-        
-        return '' if $num % $_ == 0;
-      
-      }
-
-      return 1;
-
-    },
-
-    factorial => sub {
-
-      my $f = 1;
-
-      do { $f *= $_ } for ( 2 .. $num );
-
-      return $f;
-
-    },
-  
-  };
-
-  my $self = {
-    
-    num        => $num,
-    properties => $properties,
-
-  };
+  my $self = { num => $num };
 
   bless $self, $class;
 
 }
 
-sub _props {
+sub num { shift->{num} }
 
-  my ($self, $key) = @_;
+sub is_even { shift->{num} % 2 == 0 }
 
-  my $props = $self->{properties}->{$key};
+sub is_negative { shift->{num} < 0 }
 
-  # If we have a promise (callback), this is the first time the method has been called.
-  # Run it and replace the callback with the return value.
-  if ( ref $props eq 'CODE' ) {
+sub squared { 
+  my $n = shift->{num};
 
-    $props = $props->();
-    $self->{properties}->{$key} = $props;
-
-  }
-
-  return $props;
-
+  $n * $n;
 }
 
-sub is_even { shift->_props('even') }
+sub is_prime {
+  my $n = shift->{num};
 
-sub is_negative { shift->_props('negative') }
+  return '' if $n < 2;
 
-sub squared { shift->_props('squared') }
+  for ( 2 .. ($n - 1) ) {
+    
+    return '' if $n % $_ == 0;
+  
+  }
 
-sub is_prime { shift->_props('prime') }
+  1;
+}
 
-sub factorial { shift->_props('factorial') }
+sub factorial {
+  my $n = shift->{num};
+
+  return '' if $n < 0;
+  
+  my $f = 1;
+
+  do { $f *= $_ } for ( 2 .. $n );
+
+  $f;
+}
 
 1;

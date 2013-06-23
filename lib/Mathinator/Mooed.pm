@@ -4,7 +4,7 @@ use Carp qw(croak);
 use Memoize;
 use Moo;
 
-memoize(qw(_build_even _build_negative _build_prime factorial squared));
+memoize( qw(_build_even _build_negative _build_prime factorial squared) );
 
 sub BUILDARGS {
 
@@ -47,6 +47,9 @@ sub _build_prime {
 
 sub factorial {
   my $n = shift->num;
+
+  return '' if $n < 0;
+  
   my $f = 1;
 
   do { $f *= $_ } for ( 2 .. $n );
