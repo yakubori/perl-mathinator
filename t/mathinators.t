@@ -122,7 +122,7 @@ foreach my $s (@shoulds) {
   my $mat = Mathinator->new( $test );
   my $moo = Mathinator::Mooed->new( num => $test );
   
-  print "\n\n Mathinator \n\n";
+  #print "\n\nMathinator on $test\n\n";
 
   is($mat->num, $num, "$test is $num.");
   is($mat->is_even, $even, "$test is_even() is [$even].");
@@ -131,7 +131,7 @@ foreach my $s (@shoulds) {
   is($mat->is_prime, $pri, "$test is_prime() is [$pri].");
   is($mat->squared, $sqr, "$test squared() is [$sqr].");
 
-  print "\n\n Mathinator::Mooed \n\n";
+  #print "\n\nMathinator::Mooed on $test\n\n";
 
   is($moo->num, $num, "$test is $num.");
   is($moo->even, $even, "$test even() is [$even].");
@@ -144,27 +144,35 @@ foreach my $s (@shoulds) {
 
 }
 
-print "\n\n Negatives Tests - Mathinator \n\n";
+# Negative integer tests.
+#
+for ( 1 .. 5 ) {
+  
+  my $n = $_ * -1;
 
-$m = Mathinator->new(-1);
-$mm = Mathinator::Mooed->new( num => -1 );
+  my $even = $n % 2 == 0;
 
-is($m->num, -1, 'Negative is ok: '.$m->num);
-ok($m->is_negative, 'Negative is_negative() is true.');
-ok(!$m->is_prime, 'Negative is_prime() is false.');
-ok(!$m->is_even, 'Negative is_even() is false for '.$m->num);
-is($m->squared, 1, 'Negative squared() is '. $m->squared .' for '. $m->num);
-ok(!$m->factorial, 'Negative factorial() is false.');
+  $m = Mathinator->new( $n );
+  $mm = Mathinator::Mooed->new( num => $n );
 
-print "\n\n Negatives Tests - Mathinator::Mooed \n\n";
+  #print "\n\nNegatives Tests - Mathinator on $n\n\n";
 
-is($mm->num, -1, 'Negative is ok: '.$m->num);
-ok($mm->negative, 'Negative negative() is true.');
-ok(!$mm->prime, 'Negative prime() is false.');
-ok(!$mm->even, 'Negative even() is false for '.$m->num);
-is($mm->squared, 1, 'Negative squared() is '. $m->squared .' for '. $m->num);
-ok(!$mm->factorial, 'Negative factorial() is false.');
+  is($m->num, $n, 'Negative is ok: '.$m->num);
+  ok($m->is_negative, 'Negative is_negative() is true.');
+  ok(!$m->is_prime, 'Negative is_prime() is false.');
+  is($m->is_even, $even, 'Negative is_even() is ['. $even .'] for '.$m->num);
+  is($m->squared, $n * $n, 'Negative squared() is '. $m->squared .' for '. $m->num);
+  ok(!$m->factorial, 'Negative factorial() is false.');
+
+  #print "\n\nNegatives Tests - Mathinator::Mooed on $n\n\n";
+
+  is($mm->num, $n, 'Negative is ok: '.$m->num);
+  ok($mm->negative, 'Negative negative() is true.');
+  ok(!$mm->prime, 'Negative prime() is false.');
+  is($mm->even, $even, 'Negative even() is ['. $even .'] for '.$m->num);
+  is($mm->squared, $n * $n, 'Negative squared() is '. $m->squared .' for '. $m->num);
+  ok(!$mm->factorial, 'Negative factorial() is false.');
+
+}
 
 done_testing();
-
-1;
